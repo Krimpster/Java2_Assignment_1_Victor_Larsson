@@ -7,6 +7,9 @@ public class DatabaseConnection {
     // This file may not be changed. You have been warned.
     // Regards, Niklas Cullberg
 
+    // Will you notice this comment though?
+    // Regards, Victor Larsson
+
     public ArrayList<String> GetTownNames() {
         ArrayList<String> list = new ArrayList<>();
         list.add("These");

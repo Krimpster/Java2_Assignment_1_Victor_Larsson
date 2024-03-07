@@ -2,13 +2,24 @@ package org.example;
 
 import org.example.objects.Building;
 import org.example.objects.Worker;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 
+import static java.lang.System.in;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class VillageTest {
+
+    InputStream systemIn = in;
+
+    @AfterEach
+    void restoreSystemIO(){
+        System.setIn(systemIn);
+    }
 
     @Test
     void FeedWorkers_Should_FeedWorkersAnd_Day_Should_Advance(){
@@ -75,6 +86,38 @@ public class VillageTest {
         assertEquals(expectedFood, village.getFood());
         assertEquals(expectedMetal, village.getMetal());
         assertEquals(expectedWood, village.getWood());
+    }
+
+    @Test
+    void Resources_ShouldBe_AddedBasedOnBuildingsToo(){
+        Village village = new Village();
+        int expectedMaxWorkers = village.getMaxWorkers() + 2;
+        int expectedFoodPerDay = village.getFoodPerDay() + 5;
+        int expectedMetalPerDay = village.getMetalPerDay() + 1;
+        int expectedWoodPerDay = village.getWoodPerDay() + 1;
+
+        village.setFood(99);
+        village.setWood(18);
+        village.setMetal(8);
+
+        village.AddWorker("Test1", "builder");
+        village.AddWorker("Farmer", "farmer");
+        village.AddWorker("Miner", "miner");
+        village.AddWorker("Lumberjack", "lumberjack");
+
+        village.AddProject("House");
+        village.AddProject("Farm");
+        village.AddProject("Quarry");
+        village.AddProject("Woodmill");
+
+        for(int i = 0; i <= 20; i++){
+            village.Day();
+        }
+
+        assertEquals(expectedMaxWorkers, village.getMaxWorkers());
+        assertEquals(expectedFoodPerDay, village.getFoodPerDay());
+        assertEquals(expectedMetalPerDay, village.getMetalPerDay());
+        assertEquals(expectedWoodPerDay, village.getWoodPerDay());
     }
 
     @Test
@@ -192,6 +235,78 @@ public class VillageTest {
 
         assertTrue(village.isGameOver());
         System.out.println("Is the game over? " + village.isGameOver());
+    }
+
+    @Test
+    void GameOver_ShouldNotHappenIf_NoWorkersAreAdded(){
+        Village village = new Village();
+
+        village.Day();
+
+        assertFalse(village.isGameOver());
+    }
+
+    @Test
+    void GameOver_ShouldHappenIf_CastleIsBuilt(){
+        Village village = new Village();
+
+        village.setWood(50);
+        village.setMetal(50);
+        village.setFood(100);
+
+        village.AddWorker("Test1", "builder");
+        village.AddWorker("Test2", "farmer");
+
+        village.AddProject("Castle");
+
+        for(int i = 0; i < 50; i++){
+            village.Day();
+        }
+
+        assertTrue(village.isGameOver());
+    }
+
+    @Test
+    void PlayingTheWholeGame_ShouldMake_GameOver(){
+        Village village = new Village();
+
+        village.AddWorker("Test1", "farmer");
+        village.AddWorker("Test2", "farmer");
+        village.AddWorker("Test3", "builder");
+        village.AddWorker("Test4", "lumberjack");
+        village.AddWorker("Test5", "lumberjack");
+        village.AddWorker("Test6", "lumberjack");
+
+        for(int i = 0; i <= 68; i++){
+            if (i == 2){
+                village.AddProject("House");
+                village.Day();
+            }
+            else if (i == 4) {
+                village.AddProject("House");
+                village.Day();
+            }
+            else if (i == 5) {
+                village.AddWorker("Test7", "farmer");
+                village.AddWorker("Test8", "miner");
+                village.AddWorker("Test9", "miner");
+                village.Day();
+            }
+            else if (i == 7){
+                village.AddWorker("Test10", "lumberjack");
+                village.AddWorker("Test11", "miner");
+                village.AddWorker("Test12", "miner");
+                village.Day();
+            }
+            else if (i == 19){
+                village.AddProject("Castle");
+                village.Day();
+            }
+            else {
+                village.Day();
+            }
+        }
+        assertTrue(village.isGameOver());
     }
 
     @Test
